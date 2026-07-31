@@ -624,6 +624,8 @@
     <input type="text" id="ghTokenInput" placeholder="github_pat_…">
     <button class="hbtn" id="btnSaveConfig" style="width:100%;margin-top:9px">⇪ SAVE PROFILES TO GITHUB (ENCRYPTED)</button>
     <button class="hbtn" id="btnImportV1" style="width:100%;margin-top:9px">⇩ IMPORT WALLETS FROM V1</button>
+    <button class="hbtn" id="btnDownloadCfg" style="width:100%;margin-top:9px">⬇ DOWNLOAD config.enc (no-token fallback)</button>
+    <label>No token? Download the encrypted file, then on GitHub: repo → Add file → Upload files → drop config.enc → commit to gh-pages. Same result.</label>
     <button class="hbtn" id="btnLock" style="width:100%;margin-top:9px">🔒 LOCK (forget passphrase on this device)</button>
     <label id="syncStatus" style="color:var(--text-muted)">Unsynced changes live only in this browser.</label>
   </div>
@@ -704,7 +706,7 @@ const store = {
 };
 
 /* ---------- config ---------- */
-const BUILD = 'v18-V2';
+const BUILD = 'v18.1-V2';
 const DEFAULT_IDS = [1338795, 1342410, 1340170, 1340238, 1339457];
 const BASE_RPCS = [
   'https://eth.drpc.org',
@@ -3016,6 +3018,14 @@ function wireSettings(){
   });
   $('#btnSaveConfig').addEventListener('click',saveConfigToGitHub);
   $('#btnImportV1').addEventListener('click',importFromV1);
+  $('#btnDownloadCfg').addEventListener('click',async()=>{
+    if(!PASSPHRASE){ log('warning','Unlock with your passphrase first.'); return; }
+    const enc=await encryptJsonB(CONFIG_DATA, PASSPHRASE);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([enc],{type:'application/json'}));
+    a.download='config.enc'; a.click(); URL.revokeObjectURL(a.href);
+    log('good','config.enc downloaded (encrypted). Upload it to the repo root on the gh-pages branch — the refresher picks it up within ~15 min (or instantly if you also run the workflow manually).');
+  });
   $('#btnLock').addEventListener('click',()=>{ store.set('passSaved',null); location.reload(); });
   $('#addSolWalletBtn').addEventListener('click',()=>{
     const w=$('#addSolWallet').value.trim();
