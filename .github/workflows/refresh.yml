@@ -1,11 +1,6 @@
 name: refresh-data
 on:
   workflow_dispatch:
-  push:
-    branches: [gh-pages]
-    paths: ['scripts/**', '.github/workflows/**', 'config.enc']
-  schedule:
-    - cron: '*/15 * * * *'
 permissions:
   contents: write
 concurrency:
